@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+
+
+<style>
+	body {
+		margin: 5px;
+	}
+	/* Chrome, Safari, Edge, Opera */
+	input::-webkit-outer-spin-button,
+	input::-webkit-inner-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+
+	/* Firefox */
+	input[type=number] {
+		-moz-appearance: textfield;
+	}
+
+	.table > div {
+		float: left;
+		width: 50%;
+	}
+
+	/* Clear floats after the columns */
+	.table:after {
+		content: "";
+		display: table;
+		clear: both;
+	}
+</style>
+
+<div class="table">
+	<div>
+		<canvas id="canvas" width="720" height="720" style="border:1px solid grey"></canvas>
+	</div>
+	<div>
+		<form>
+			<table>
+				<tr>
+					<td>
+						<label for="startx">Start X Pos</label> <br>
+						<input id="startx" name="startx" type="number" step="any" required>
+					</td>
+					<td>
+						<label for="endx">End X Pos</label> <br>
+						<input id="endx" name="endx" type="number" step="any" required>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<label for="starty">Start Y Pos</label> <br>
+						<input id="starty" name="starty" type="number" step="any" required>
+					</td>
+					<td>
+						<label for="endy">End Y Pos</label> <br>
+						<input id="endy" name="endy" type="number" step="any" required>
+					</td>
+				</tr>
+				<tr>
+					<td colspan = '2' style="text-align: center;">
+						<label for="iterations">Iterations</label> <br>
+						<input id="iterations" name="iterations" type="number" step="any" required>
+					</td>
+				</tr>
+			</table>
+			<br> <br>
+			<button>Render</button>
+		</form>
+		<br>
+		<button onclick='location.href="file:///d%3A/Python/julia-set-renderer.html"'>Reset</button>
+	</div>
+</div> 
+
+
+<script>
+	
+
+	var start_x = -2
+	var end_x = 1
+	var start_y = -1.5
+	var end_y = 1.5 
+	var iterations = 100;
+
+	const urlParams = new URLSearchParams(window.location.search);
+
+	if (urlParams.size != 0) {
+		start_x = parseFloat(urlParams.get('startx'))
+		end_x = parseFloat(urlParams.get('endx'))
+		start_y = parseFloat(urlParams.get('starty'))
+		end_y = parseFloat(urlParams.get('endy'))
+		iterations = parseFloat(urlParams.get('iterations'))
+		
+		document.getElementById('startx').value = start_x
+		document.getElementById('endx').value = end_x
+		document.getElementById('starty').value = start_y
+		document.getElementById('endy').value = end_y
+		document.getElementById('iterations').value = iterations
+
+
+	}
+
+
+
+	const canvas = document.getElementById("canvas");
+	const ctx = canvas.getContext("2d");
+	
+	const size = [720,720]
+	
+	function f(z,c) {
+		return [((z[0]**2) - (z[1]**2)) + c[0], (2*(z[0]*z[1])) + c[1]]
+	}
+	
+	function dist(a, b) {
+		x1 = a[0]
+		y1 = a[1]
+		x2 = b[0]
+		y2 = b[1]
+		const X = x2 - x1;
+		const Y = y2 - y1;
+		return Math.sqrt(X * X + Y * Y );
+	}
+	
+	function it(z, c, ite) {
+		temp = f(z,c)
+		iterations = 0
+		for (var i = 0; i<ite; i++ ) {
+			temp = f(temp,c)
+			iterations += 1
+			if (dist([0,0], temp) >= 2 || iterations==ite) {
+				return iterations
+			}
+		}
+	}
+	
+	function map(x, input_start, input_end, output_start, output_end) {
+		return (x - input_start) / (input_end - input_start) * (output_end - output_start) + output_start
+	
+	}
+	
+	
+	function render(startx, endx, starty, endy, max_iterations) {
+		start_x = startx
+		end_x = endx
+		start_y = starty
+		end_y = endy
+		max_iterations = max_iterations
+		
+		for (var y = 0; y<size[1]; y++) {
+			for (var x = 0; x<size[0]; x++) {
+				new_coordinates = [map(x, 0, size[0], startx, endx), map(y, 0, size[1], starty, endy)]
+				
+				iterations = it([0,0], new_coordinates, max_iterations)
+				
+				color = map(iterations, 0, max_iterations, 0, 255)
+				
+				ctx.fillStyle = `rgb(${color},${color},${color})`;
+				ctx.fillRect(x, y, 1, 1);
+			}
+		}
+	}
+	
+	mousex1 = null
+	mousey1 = null
+	
+	
+	function getMousePosition(canvas, event) { 
+		let rect = canvas.getBoundingClientRect(); 
+		let x = map(event.clientX - rect.left, 0, size[0], start_x, end_x)
+		let y = map(event.clientY - rect.top, 0, size[1], start_y, end_y)
+		//console.log(map(x, 0, size[0], start_x, end_x), map(y, 0, size[1], start_y, end_y))
+		if (mousex1==null & mousey1 == null) {
+			mousex1 = x
+			mousey1 = y
+		} else {
+			coords = [x,y]
+			
+			if (x>mousex1 & y>mousey1) {
+				if (x-mousex1 > y-mousey1) {
+					mousex2 = mousex1 + (x-mousex1)
+					mousey2 = mousey1 + (x-mousex1)
+				} else {
+					mousex2 = mousex1 + (y-mousey1)
+					mousey2 = mousey1 + (y-mousey1)
+				}
+				//console.log([mousex1, mousey1], [mousex2, mousey2])
+				//render(mousex1, mousex2, mousey1, mousey2)
+				location.href = `file:///d%3A/Python/julia-set-renderer.html?startx=${mousex1}&endx=${mousex2}&starty=${mousey1}&endy=${mousey2}&iterations=${75 * (Math.log10(size[0]/(mousex2-mousex1)))^1.25}`;
+			}
+			mousex1 = null
+			mousey1 = null
+		}
+		
+	} 
+	
+	let canvasElem = document.querySelector("canvas"); 
+		
+	canvasElem.addEventListener("mousedown", function(e) 
+	{ 
+		getMousePosition(canvasElem, e); 
+	}); 
+
+	render(start_x, end_x, start_y, end_y, iterations)
+	
+	
+</script> 
+
+</body>
+</html>
