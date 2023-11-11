@@ -71,7 +71,7 @@
 			<button>Render</button>
 		</form>
 		<br>
-		<button onclick='location.href="https://talentunlimited.github.io/Mandelbrot-Viewer/index.html"'>Reset</button>
+		<button onclick='location.href="./index.html"'>Reset</button>
 	</div>
 </div> 
 
@@ -188,7 +188,7 @@
 				}
 				//console.log([mousex1, mousey1], [mousex2, mousey2])
 				//render(mousex1, mousex2, mousey1, mousey2)
-				location.href = `https://talentunlimited.github.io/Mandelbrot-Viewer/index.html?startx=${mousex1}&endx=${mousex2}&starty=${mousey1}&endy=${mousey2}&iterations=${75 * (Math.log10(size[0]/(mousex2-mousex1)))^1.25}`;
+				location.href = `./index.html?startx=${mousex1}&endx=${mousex2}&starty=${mousey1}&endy=${mousey2}&iterations=${75 * (Math.log10(size[0]/(mousex2-mousex1)))^1.25}`;
 			}
 			mousex1 = null
 			mousey1 = null
