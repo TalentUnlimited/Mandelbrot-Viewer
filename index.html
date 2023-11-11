@@ -148,19 +148,24 @@
 		start_y = starty
 		end_y = endy
 		max_iterations = max_iterations
-		
-		for (var y = 0; y<size[1]; y++) {
-			for (var x = 0; x<size[0]; x++) {
+		const imageData = ctx.createImageData(size[0], size[1]);
+		const data = imageData.data;
+		for (var y = 0; y < size[1]; y++) {
+			for (var x = 0; x < size[0]; x++) {
 				new_coordinates = [map(x, 0, size[0], startx, endx), map(y, 0, size[1], starty, endy)]
-				
-				iterations = it([0,0], new_coordinates, max_iterations)
-				
+				iterations = it([0, 0], new_coordinates, max_iterations)
+
 				color = map(iterations, 0, max_iterations, 0, 255)
-				
-				ctx.fillStyle = `rgb(${color},${color},${color})`;
-				ctx.fillRect(x, y, 1, 1);
+
+				var indx = 4*(y*size[0]+x);
+
+				data[indx] = color;
+				data[indx + 1] = color;
+				data[indx + 2] = color;
+				data[indx + 3] = 255;
 			}
 		}
+		ctx.putImageData(imageData, 0, 0);
 	}
 	
 	mousex1 = null
